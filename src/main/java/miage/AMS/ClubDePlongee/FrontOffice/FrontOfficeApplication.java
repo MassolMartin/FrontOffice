@@ -14,10 +14,10 @@ import org.springframework.web.client.RestTemplate;
 public class FrontOfficeApplication {
 
     // URL des micro-services de gestion des membres
-    public static final String MEMBRES_SERVICE_URL = "http://GESTIONMEMBRES";
+    public static final String MEMBRES_SERVICE_URL = "http://localhost:10000";
 
     // URL des micro-services de gestion des cours
-    public static final String COURS_SERVICE_URL = "http://GESTIONCOURS";
+    public static final String COURS_SERVICE_URL = "http://localhost:20000";
 
     // URL de l'API OpenData de Toulouse métropole pour la gestion des lieux
     public static final String LIEU_SERVICE_URL = "https://data.toulouse-metropole.fr/api/records/1.0/search/?dataset=piscines&q=&rows=-1";
@@ -30,7 +30,7 @@ public class FrontOfficeApplication {
      * Factory de bean
      */
     @Bean
-    @LoadBalanced
+    //@LoadBalanced
     public RestTemplate restTemplate() { return new RestTemplate(); }
 
 

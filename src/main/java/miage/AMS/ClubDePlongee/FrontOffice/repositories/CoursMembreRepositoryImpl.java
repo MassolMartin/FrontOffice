@@ -33,11 +33,11 @@ public class CoursMembreRepositoryImpl implements CoursMembreRepository {
     Logger logger = LoggerFactory.getLogger(this.getClass());
     
     @Autowired
-    @LoadBalanced
+    //@LoadBalanced
     protected RestTemplate  restTemplateCours;
     
     @Autowired
-    @LoadBalanced
+    //@LoadBalanced
     protected RestTemplate  restTemplateMembre;
     
     protected String serviceUrlCours;

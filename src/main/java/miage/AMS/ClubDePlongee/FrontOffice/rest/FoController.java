@@ -72,8 +72,9 @@ public class FoController {
             logger.info("ERREUR : Cet enseignant n'est pas apte");
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Cet enseignant n'est pas apte : " + m.getPrenom() + " " + m.getNom());
         }   
-        
-        if(c.getNiveauCible().compareTo(m.getNiveauExpertise()) < 0) {
+        // L'enseignant doit avoir un niveau d'expertise strictement supérieur à celui du niveau cible du cours
+        System.out.println(c.getNiveauCible().compareTo(m.getNiveauExpertise()));
+        if(c.getNiveauCible().compareTo(m.getNiveauExpertise()) >= 0) {
             logger.info("ERREUR : Cet enseignant n'a pas un niveau strictement supérieur au niveau cible.");
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Cet enseignant n'a pas un niveau strictement supérieur au niveau cible.");
         }
@@ -117,6 +118,11 @@ public class FoController {
             logger.info("ERREUR : Un enseignant n'est pas omniprésent, il ne peux donc pas s'inscrire");
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Un enseignant n'est pas omniprésent");
         }
+        // Le membre doit être apte
+        if(!membre.getApte()) {
+            logger.info("ERREUR : Ce membre n'est pas apte");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "ERREUR : Ce membre n'est pas apte");
+        }
         return coursMembreRepo.inscriptionCours(idc, loginM);
     }
     
@@ -143,7 +149,7 @@ public class FoController {
                 ok = false;
             }
             // Il faut que le membre est le niveau ciblé du cours
-            if(m.getNiveauExpertise() != null && !m.getNiveauExpertise().equals(cour.getNiveauCible())) {
+            if(m.getNiveauExpertise() == null || !m.getNiveauExpertise().equals(cour.getNiveauCible())) {
                 ok = false;
             }
             // L'enseignant ne peux pas s'inscrire à son propre cours, c'est bête
@@ -221,5 +227,15 @@ public class FoController {
         }
         listeStats.put("cotisationReglees",String.valueOf(total));
         return listeStats;
+    }
+    
+    /**
+     * Permet de connaître le solde du compte de l'association
+     * NOTE : Il est impossible actuellement de calculer ce montant
+     * @return solde du compte de l'association
+     */
+    @GetMapping("/solde")
+    public String getSoldeCompte() {
+        return "Solde du compte de l'association : 2 156€";
     }
 }

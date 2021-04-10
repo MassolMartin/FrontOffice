@@ -42,6 +42,9 @@ public class Membre implements Serializable {
     // Email du membre
     public String email;
     
+    // Adresse de résidence
+    private String adresse;
+    
     // Niveau d'expertise en plongée (de 1 à 5)
     public Niveau niveauExpertise;
     
