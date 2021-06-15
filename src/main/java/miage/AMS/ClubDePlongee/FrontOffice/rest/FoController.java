@@ -73,7 +73,6 @@ public class FoController {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Cet enseignant n'est pas apte : " + m.getPrenom() + " " + m.getNom());
         }   
         // L'enseignant doit avoir un niveau d'expertise strictement supérieur à celui du niveau cible du cours
-        System.out.println(c.getNiveauCible().compareTo(m.getNiveauExpertise()));
         if(c.getNiveauCible().compareTo(m.getNiveauExpertise()) >= 0) {
             logger.info("ERREUR : Cet enseignant n'a pas un niveau strictement supérieur au niveau cible.");
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Cet enseignant n'a pas un niveau strictement supérieur au niveau cible.");
@@ -101,28 +100,34 @@ public class FoController {
         // Il faut qu'il reste des places dans ce cours pour s'inscrire
         if(!cours.placesRestantes(membre)) {
             logger.info("ERREUR : Plus de places disponibles dans ce cours : " + cours.getNom());
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Plus de places dans ce cours");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "ERREUR : Plus de places dans ce cours");
         }
         // Ne peut pas s'inscrire à un cours si il est déjà passé
         if(cours.getCreneau().before(new Date())) {
             logger.info("ERREUR : Ce cours est déjà passé : " + cours.getNom());
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Cours terminé");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "ERREUR : Cours terminé");
         }
         // Il faut que le membre est le niveau ciblé du cours
-        if(membre.getNiveauExpertise() != null && !membre.getNiveauExpertise().equals(cours.getNiveauCible())) {
+        if(membre.getNiveauExpertise() == null || !membre.getNiveauExpertise().equals(cours.getNiveauCible())) {
             logger.info("ERREUR : Le niveau de ce membre n'est pas égal à celui du cours. Niveau du cours : " + cours.getNiveauCible() + " Niveau membre :" + membre.getNiveauExpertise());
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Ce membre n'a pas au minimum le niveau cible du cours");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "ERREUR : Le niveau de ce membre n'est pas égal à celui du cours");
         }
         // L'enseignant ne peux pas s'inscrire à son propre cours, c'est bête
         if(cours.getLoginEnseignant().equalsIgnoreCase(membre.getUserLogin())) {
             logger.info("ERREUR : Un enseignant n'est pas omniprésent, il ne peux donc pas s'inscrire");
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Un enseignant n'est pas omniprésent");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "ERREUR : Un enseignant n'est pas omniprésent");
         }
         // Le membre doit être apte
         if(!membre.getApte()) {
             logger.info("ERREUR : Ce membre n'est pas apte");
             throw new ResponseStatusException(HttpStatus.CONFLICT, "ERREUR : Ce membre n'est pas apte");
         }
+        // Le membre doit avoir réglé sa cotisation
+        if(!membre.getCotisationValide()) {
+            logger.info("ERREUR : La cotisation de ce membre n'est pas valide");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "ERREUR : La cotisation de ce membre n'est pas valide");
+        }
+        // Le membre doit être 
         return coursMembreRepo.inscriptionCours(idc, loginM);
     }
     
@@ -154,6 +159,14 @@ public class FoController {
             }
             // L'enseignant ne peux pas s'inscrire à son propre cours, c'est bête
             if(cour.getLoginEnseignant().equalsIgnoreCase(m.getUserLogin())) {
+                ok = false;
+            }
+            // Le membre doit avoir sa cotisation valide
+            if(!m.getCotisationValide()) {
+                ok = false;
+            }
+            // Le membre doit être apte
+            if(!m.getApte()) {
                 ok = false;
             }
             if(ok) {
